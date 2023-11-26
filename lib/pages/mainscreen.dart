@@ -1,5 +1,8 @@
 import 'package:flutter_svg/svg.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:geocoding/geocoding.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -12,10 +15,118 @@ class _MainScreen extends State<MainScreen> {
   int _currentIndex = 0;
   bool isPressed = false;
 
+  String _locationName = 'Unknown';
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermission();
+  }
+
+  _checkPermission() async {
+    var status = await Permission.location.status;
+    print('Checking....');
+    if (status == PermissionStatus.denied) {
+      await Permission.location.request();
+    } else if (status == PermissionStatus.granted) {
+      _getCurrentLocation();
+    } else {
+      // Handle other cases (like PermissionStatus.permanentlyDenied)
+    }
+  }
+
+  _getCurrentLocation() async {
+    try {
+      final currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Perform reverse geocoding to get the location name
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        currentPosition.latitude,
+        currentPosition.longitude,
+      );
+
+      Placemark place = placemarks[0];
+      String locationName =
+          "${place.name}, ${place.locality}, ${place.country}";
+
+      setState(() {
+        _locationName = locationName;
+      });
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar(),
+      appBar: AppBar(
+        title: Row(
+          children: [
+            GestureDetector(
+              onTap: () {
+                print('Profile Pressed');
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(
+                    8), // Adjust the borderRadius as needed
+                child: const Image(
+                  image: AssetImage('assets/images/avatar.png'),
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Xin chào, Hiền thúi!',
+                  style: TextStyle(fontSize: 13.0),
+                ),
+                Text(
+                  'Hoàn tất hồ sơ',
+                  style: TextStyle(fontSize: 13.0, color: Colors.red),
+                )
+              ],
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () {
+                print('Location Button Pressed');
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _locationName != null
+                      ? Container(
+                          width: 100,
+                          child: Text('${_locationName}',
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 13.0)),
+                        )
+                      : const Text('Getting location...',
+                          style: TextStyle(color: Colors.grey, fontSize: 13.0)),
+                  const Text(
+                    'Địa điểm hiện tại',
+                    style: TextStyle(color: Colors.red, fontSize: 13.0),
+                  ),
+                ],
+              ),
+            ),
+            SvgPicture.asset(
+              'assets/svg/location.svg',
+              height: 20,
+              width: 20,
+            )
+          ],
+        ),
+      ),
       body: Center(
         child: ListView(
           children: [
@@ -60,8 +171,8 @@ class _MainScreen extends State<MainScreen> {
           intensity: 0.07,
           surfaceIntensity: 0.07,
           color: Colors.red),
-      child: Center(
-        child: const Text(
+      child: const Center(
+        child: Text(
           'Gọi ngay!',
           style: TextStyle(
               fontSize: 35, fontWeight: FontWeight.w700, color: Colors.white),
@@ -184,63 +295,64 @@ class _MainScreen extends State<MainScreen> {
     );
   }
 
-  AppBar appBar() {
-    return AppBar(
-      title: Row(
-        children: [
-          TextButton(
-            onPressed: () {
-              print('Profile Pressed');
-            },
-            child: ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(8), // Adjust the borderRadius as needed
-              child: const Image(
-                image: AssetImage('assets/images/avatar.png'),
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Xin chào, Hiền thúi!',
-                style: TextStyle(fontSize: 13.0),
-              ),
-              Text(
-                'Hoàn tất hồ sơ',
-                style: TextStyle(fontSize: 13.0, color: Colors.red),
-              )
-            ],
-          ),
-          const Spacer(),
-          TextButton(
-            onPressed: () {
-              print('Location Button Pressed');
-            },
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Ha Noi',
-                    style: TextStyle(color: Colors.grey, fontSize: 13.0)),
-                Text(
-                  'Địa điểm hiện tại',
-                  style: TextStyle(color: Colors.red, fontSize: 13.0),
-                ),
-              ],
-            ),
-          ),
-          SvgPicture.asset(
-            'assets/svg/location.svg',
-            height: 20,
-            width: 20,
-          )
-        ],
-      ),
-    );
-  }
+//   AppBar appBar() {
+//     return AppBar(
+//       title: Row(
+//         children: [
+//           GestureDetector(
+//             onTap: () {
+//               print('Profile Pressed');
+//             },
+//             child: ClipRRect(
+//               borderRadius:
+//                   BorderRadius.circular(8), // Adjust the borderRadius as needed
+//               child: const Image(
+//                 image: AssetImage('assets/images/avatar.png'),
+//                 width: 50,
+//                 height: 50,
+//                 fit: BoxFit.cover,
+//               ),
+//             ),
+//           ),
+//           const SizedBox(width: 10),
+//           const Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Text(
+//                 'Xin chào, Hiền thúi!',
+//                 style: TextStyle(fontSize: 13.0),
+//               ),
+//               Text(
+//                 'Hoàn tất hồ sơ',
+//                 style: TextStyle(fontSize: 13.0, color: Colors.red),
+//               )
+//             ],
+//           ),
+//           const Spacer(),
+//           GestureDetector(
+//             onTap: () {
+//               print('Location Button Pressed');
+//             },
+//             child: const Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text('Lat: , Long: ',
+//                     style: TextStyle(color: Colors.grey, fontSize: 13.0)),
+//                 Text(
+//                   'Địa điểm hiện tại',
+//                   style: TextStyle(color: Colors.red, fontSize: 13.0),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           SvgPicture.asset(
+//             'assets/svg/location.svg',
+//             height: 20,
+//             width: 20,
+//           )
+//         ],
+//       ),
+//     );
+//   }
+// }
 }
