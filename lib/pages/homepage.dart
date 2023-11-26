@@ -24,10 +24,12 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _buildScreens() {
     _getInitialInfo();
     return [
-      const MainScreen(),
+      MainScreen(userInfo: contacts[0]),
       ContactPage(contacts: contacts),
-      const MainScreen(),
-      const MainScreen()
+      MainScreen(
+        userInfo: contacts[0],
+      ),
+      MainScreen(userInfo: contacts[0])
     ];
   }
 

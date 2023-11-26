@@ -23,6 +23,15 @@ class ContactModel {
   static List<ContactModel> getContact() {
     List<ContactModel> contacts = [];
 
+    contacts.add(ContactModel(
+      name: 'Đỗ Thu Hiền',
+      birth: '12 August 2000',
+      relation: 'Bản thân',
+      avatarPath: 'assets/images/avatar.png',
+      address: 'Từ Sơn, Bắc Linh',
+      job: 'Công nhân xưởng in',
+    ));
+
     contacts.add(
       ContactModel(
           name: 'Trần Ngọc Thành',
@@ -62,7 +71,7 @@ class ContactModel {
     contacts.add(
       ContactModel(
           name: 'Anh zai Hậu',
-          birth: '22 November 2000',
+          birth: '22 November 1998',
           relation: 'Anh ruột',
           avatarPath: 'assets/images/aHau.jpg',
           blood: 'B',
@@ -74,7 +83,7 @@ class ContactModel {
     contacts.add(
       ContactModel(
           name: 'Em cu zai Huy',
-          birth: '22 November 2000',
+          birth: '22 November 2004',
           relation: 'Em ruột',
           avatarPath: 'assets/images/cuHuy.jpg',
           blood: 'B',
@@ -82,6 +91,15 @@ class ContactModel {
           job: 'Xây dựng',
           note: 'Alo alo alo alo alo alo alo alo alo alo'),
     );
+
+    contacts.add(ContactModel(
+      name: 'Em cu gái Linh',
+      birth: '10 November 2003',
+      relation: 'Em gái chồng',
+      avatarPath: 'assets/images/avatar.png',
+      address: '160 Lac Long Quan, Tay Ho, Ha Noi',
+      job: 'Sinh viên ',
+    ));
 
     return contacts;
   }

@@ -1,3 +1,6 @@
+import 'package:flutter_emergency/models/contact_model.dart';
+import 'package:flutter_emergency/pages/specificInfo.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
 import 'package:geolocator/geolocator.dart';
@@ -5,7 +8,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:geocoding/geocoding.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({Key? key, required this.userInfo}) : super(key: key);
+  final ContactModel userInfo;
 
   @override
   _MainScreen createState() => _MainScreen();
@@ -14,13 +18,19 @@ class MainScreen extends StatefulWidget {
 class _MainScreen extends State<MainScreen> {
   int _currentIndex = 0;
   bool isPressed = false;
-
   String _locationName = 'Unknown';
+  Future<void> _refresh() async {
+    await _getLocation();
+  }
 
   @override
   void initState() {
     super.initState();
     _checkPermission();
+  }
+
+  void _makePhoneCall(String phoneNumber) async {
+    await FlutterPhoneDirectCaller.callNumber(phoneNumber);
   }
 
   _checkPermission() async {
@@ -29,131 +39,143 @@ class _MainScreen extends State<MainScreen> {
     if (status == PermissionStatus.denied) {
       await Permission.location.request();
     } else if (status == PermissionStatus.granted) {
-      _getCurrentLocation();
+      _getLocation();
     } else {
       // Handle other cases (like PermissionStatus.permanentlyDenied)
     }
   }
 
-  _getCurrentLocation() async {
+  Future<void> _getLocation() async {
     try {
       final currentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Perform reverse geocoding to get the location name
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        currentPosition.latitude,
-        currentPosition.longitude,
-      );
-
-      Placemark place = placemarks[0];
-      String locationName =
-          "${place.name}, ${place.locality}, ${place.country}";
-
-      setState(() {
-        _locationName = locationName;
-      });
+      _updateLocationInfo(currentPosition);
     } catch (e) {
       print("Error: $e");
     }
   }
 
+  Future<void> _updateLocationInfo(Position position) async {
+    // Perform reverse geocoding to get the location name
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude,
+      position.longitude,
+    );
+
+    Placemark place = placemarks[0];
+    String locationName = "${place.name}, ${place.locality}, ${place.country}";
+
+    setState(() {
+      _locationName = locationName;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            GestureDetector(
-              onTap: () {
-                print('Profile Pressed');
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(
-                    8), // Adjust the borderRadius as needed
-                child: const Image(
-                  image: AssetImage('assets/images/avatar.png'),
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
+      appBar: appBar(),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: Center(
+          child: ListView(
+            children: [
+              const SizedBox(
+                height: 50,
               ),
-            ),
-            const SizedBox(width: 10),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Xin chào, Hiền thúi!',
-                  style: TextStyle(fontSize: 13.0),
-                ),
-                Text(
-                  'Hoàn tất hồ sơ',
-                  style: TextStyle(fontSize: 13.0, color: Colors.red),
-                )
-              ],
-            ),
-            const Spacer(),
-            GestureDetector(
-              onTap: () {
-                print('Location Button Pressed');
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _locationName != null
-                      ? Container(
-                          width: 100,
-                          child: Text('${_locationName}',
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: Colors.grey, fontSize: 13.0)),
-                        )
-                      : const Text('Getting location...',
-                          style: TextStyle(color: Colors.grey, fontSize: 13.0)),
-                  const Text(
-                    'Địa điểm hiện tại',
-                    style: TextStyle(color: Colors.red, fontSize: 13.0),
-                  ),
-                ],
+              _mainMessageHomePage(),
+              const SizedBox(
+                height: 50,
               ),
-            ),
-            SvgPicture.asset(
-              'assets/svg/location.svg',
-              height: 20,
-              width: 20,
-            )
-          ],
-        ),
-      ),
-      body: Center(
-        child: ListView(
-          children: [
-            const SizedBox(
-              height: 50,
-            ),
-            _mainMessageHomePage(),
-            const SizedBox(
-              height: 50,
-            ),
-            // _callNowSection(distance: distance),
-            _mainButton(),
-            const SizedBox(
-              height: 50,
-            ),
-            _middleText(),
-            const SizedBox(
-              height: 20,
-            ),
-            _situationCarousel(),
-            const SizedBox(
-              height: 30,
-            )
-          ],
+              // _callNowSection(distance: distance),
+              _mainButton(),
+              const SizedBox(
+                height: 50,
+              ),
+              _middleText(),
+              const SizedBox(
+                height: 20,
+              ),
+              _situationCarousel(),
+              const SizedBox(
+                height: 30,
+              )
+            ],
+          ),
         ),
       ),
       // bottomNavigationBar: bottomNavigationBar(),
+    );
+  }
+
+  AppBar appBar() {
+    return AppBar(
+      title: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          SpecificInfo(contactData: widget.userInfo)));
+            },
+            child: ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(8), // Adjust the borderRadius as needed
+              child: const Image(
+                image: AssetImage('assets/images/avatar.png'),
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Xin chào, Hiền thúi!',
+                style: TextStyle(fontSize: 13.0),
+              ),
+              Text(
+                'Hoàn tất hồ sơ',
+                style: TextStyle(fontSize: 13.0, color: Colors.red),
+              )
+            ],
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () {},
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _locationName != null
+                    ? Container(
+                        width: 100,
+                        child: Text('${_locationName}',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 13.0)),
+                      )
+                    : const Text('Getting location...',
+                        style: TextStyle(color: Colors.grey, fontSize: 13.0)),
+                const Text(
+                  'Địa điểm hiện tại',
+                  style: TextStyle(color: Colors.red, fontSize: 13.0),
+                ),
+              ],
+            ),
+          ),
+          SvgPicture.asset(
+            'assets/svg/location.svg',
+            height: 20,
+            width: 20,
+          )
+        ],
+      ),
     );
   }
 
@@ -162,6 +184,7 @@ class _MainScreen extends State<MainScreen> {
       padding: const EdgeInsets.all(100),
       onPressed: () {
         print("Calling...");
+        _makePhoneCall('0912501959');
       },
       style: const NeumorphicStyle(
           boxShape: NeumorphicBoxShape.circle(),
