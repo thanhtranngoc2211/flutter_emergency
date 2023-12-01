@@ -92,7 +92,6 @@ class _MainScreen extends State<MainScreen> {
               const SizedBox(
                 height: 30,
               ),
-              // _callNowSection(distance: distance),
               _mainButton(),
               const SizedBox(
                 height: 50,
@@ -109,7 +108,6 @@ class _MainScreen extends State<MainScreen> {
           ),
         ),
       ),
-      // bottomNavigationBar: bottomNavigationBar(),
     );
   }
 
@@ -189,10 +187,7 @@ class _MainScreen extends State<MainScreen> {
             children: [
               GestureDetector(
                   onTap: () {
-                    // _makePhoneCall(calculateLocation._bestPhone(
-                    //     calculateLocation._getLocationData(1),
-                    //     _currentLocation));
-                    print(calculateLocation._bestPhone(
+                    _makePhoneCall(calculateLocation._bestPhone(
                         calculateLocation._getLocationData(1),
                         _currentLocation));
                   },
