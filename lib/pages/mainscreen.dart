@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_emergency/models/contact_model.dart';
+import 'package:flutter_emergency/models/police_data.dart';
 import 'package:flutter_emergency/pages/specificInfo.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_svg/svg.dart';
@@ -32,6 +33,10 @@ class _MainScreen extends State<MainScreen> {
   void initState() {
     super.initState();
     _checkPermission();
+
+    // CAUTION
+    // ONLY CALL WHEN NEED UPDATE
+    // _updatePhoneData();
   }
 
   void _makePhoneCall(String phoneNumber) async {
@@ -76,6 +81,23 @@ class _MainScreen extends State<MainScreen> {
       _locationName = locationName;
       _currentLocation = position;
     });
+  }
+
+  Future<void> _updatePhoneData() async {
+    List<Map<String, dynamic>> data = dataPolice;
+
+    for (var docData in data) {
+      try {
+        await widget.db
+            .collection("phone_numbers")
+            .doc("police")
+            .collection("numbers")
+            .add(docData);
+      } catch (e) {
+        print('Error adding document: $e');
+      }
+    }
+    print('Collect data successfully!');
   }
 
   @override
