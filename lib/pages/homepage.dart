@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_emergency/models/contact_model.dart';
 import 'package:flutter_emergency/pages/contact.dart';
@@ -13,7 +14,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _getInitialInfo() {
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> jsonDataList = [];
+
+  void _getInitialInfo() async {
     contacts = ContactModel.getContact();
   }
 
@@ -22,14 +26,11 @@ class _MyHomePageState extends State<MyHomePage> {
   List<ContactModel> contacts = [];
 
   List<Widget> _buildScreens() {
-    _getInitialInfo();
     return [
-      MainScreen(userInfo: contacts[0]),
+      MainScreen(userInfo: contacts[0], db: db),
       ContactPage(contacts: contacts),
-      MainScreen(
-        userInfo: contacts[0],
-      ),
-      MainScreen(userInfo: contacts[0])
+      ContactPage(contacts: contacts),
+      ContactPage(contacts: contacts),
     ];
   }
 
@@ -62,10 +63,25 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
+  // void _getData() async {
+  //   try {
+  //     QuerySnapshot<Map<String, dynamic>> event =
+  //         await db.collection("phone_numbers").get();
+  //     for (QueryDocumentSnapshot<Map<String, dynamic>> doc in event.docs) {
+  //       jsonDataList.add({'id': doc.id, 'data': doc.data()});
+  //     }
+  //     print(jsonDataList.toString());
+  //   } catch (e) {
+  //     print("Error getting documents: $e");
+  //   }
+  // }
+
   @override
   void initState() {
     super.initState();
     _controller = PersistentTabController(initialIndex: 0);
+    _getInitialInfo();
+    // _getData();
   }
 
   @override

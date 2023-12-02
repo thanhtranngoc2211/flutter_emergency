@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_emergency/models/contact_model.dart';
-import 'package:flutter_emergency/models/phone_numbers.dart';
 import 'package:flutter_emergency/pages/specificInfo.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,8 +10,10 @@ import 'package:geocoding/geocoding.dart';
 import 'dart:math';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key, required this.userInfo}) : super(key: key);
+  const MainScreen({Key? key, required this.userInfo, required this.db})
+      : super(key: key);
   final ContactModel userInfo;
+  final FirebaseFirestore db;
 
   @override
   _MainScreen createState() => _MainScreen();
@@ -186,10 +188,9 @@ class _MainScreen extends State<MainScreen> {
           TableRow(
             children: [
               GestureDetector(
-                  onTap: () {
-                    _makePhoneCall(calculateLocation._bestPhone(
-                        calculateLocation._getLocationData(1),
-                        _currentLocation));
+                  onTap: () async {
+                    _makePhoneCall(await calculateLocation._bestPhone(
+                        1, widget.db, _currentLocation));
                   },
                   child: Container(
                       margin: const EdgeInsets.all(8),
@@ -364,7 +365,7 @@ class _MainScreen extends State<MainScreen> {
             height: 15,
           ),
           Text(
-            'Nhấn nút đỏ phía dưới để gọi',
+            'Chọn nút tình huống phía dưới để gọi',
             style: TextStyle(fontSize: 18, color: Colors.grey),
           )
         ],
@@ -374,41 +375,48 @@ class _MainScreen extends State<MainScreen> {
 }
 
 class calculateLocation {
-  static List<PhoneModel> _getLocationData(int type) {
-    List<PhoneModel> phones = [];
-    // Get all phones in database
+  static Future<List<Map<String, dynamic>>> _getDataType(
+      int type, FirebaseFirestore db) async {
+    List<Map<String, dynamic>> phones = [];
     switch (type) {
       case 1:
-        {
-          phones = PhoneModel.getPhone();
+        try {
+          QuerySnapshot<Map<String, dynamic>> event = await db
+              .collection("phone_numbers")
+              .doc("police")
+              .collection("numbers")
+              .get();
+          for (QueryDocumentSnapshot<Map<String, dynamic>> doc in event.docs) {
+            phones.add({'id': doc.id, 'data': doc.data()});
+          }
+        } catch (e) {
+          print("Error getting documents: $e");
         }
-      case 2:
-      case 3:
-      case 4:
+        break;
     }
-
-    // get only phones in city
-
     return phones;
   }
 
-  static String _bestPhone(List<PhoneModel> phones, Position position) {
+  static Future<String> _bestPhone(
+      int type, FirebaseFirestore db, Position position) async {
+    List<Map<String, dynamic>> phones = await _getDataType(type, db);
+
     String bestPhone = '';
 
     double minDistance = double.infinity;
     const R = 6371.0;
     for (var i = 0; i < phones.length; i++) {
-      double lat1 = double.parse(phones[i].latitude);
+      double lat1 = phones[i]['data']['location'].latitude;
       double lat2 = position.latitude;
-      double lon1 = double.parse(phones[i].longtitude);
+      double lon1 = phones[i]['data']['location'].longitude;
       double lon2 = position.longitude;
       lat1 = lat1 * (pi / 180.0);
       lon1 = lon1 * (pi / 180.0);
       lat2 = lat2 * (pi / 180.0);
       lon2 = lon2 * (pi / 180.0);
       // Haversine formula
-      var dlat = double.parse(phones[i].latitude) - position.latitude;
-      var dlon = double.parse(phones[i].longtitude) - position.longitude;
+      var dlat = phones[i]['data']['location'].latitude - position.latitude;
+      var dlon = phones[i]['data']['location'].longitude - position.longitude;
       var a =
           pow(sin(dlat / 2), 2) + cos(lat1) * cos(lat2) * pow(sin(dlon / 2), 2);
       var c = 2 * atan2(sqrt(a), sqrt(1 - a));
@@ -416,10 +424,9 @@ class calculateLocation {
 
       if (distance < minDistance) {
         minDistance = distance;
-        bestPhone = phones[i].number;
+        bestPhone = phones[i]['data']['number'];
       }
     }
-
     return bestPhone;
   }
 }
