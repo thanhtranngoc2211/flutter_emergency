@@ -197,7 +197,7 @@ class _MainScreen extends State<MainScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Xin chào, Hiền thúi!',
+                'Xin chào',
                 style: TextStyle(fontSize: 13.0),
               ),
               Text(
@@ -455,7 +455,7 @@ class _MainScreen extends State<MainScreen> {
             height: 15,
           ),
           Text(
-            'Chọn nút tình huống phía dưới để gọi',
+            'Chọn đối tượng liên hệ',
             style: TextStyle(fontSize: 18, color: Colors.grey),
           )
         ],

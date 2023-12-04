@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_emergency/models/contact_model.dart';
+import 'package:flutter_emergency/pages/alonemode.dart';
 import 'package:flutter_emergency/pages/contact.dart';
 import 'package:flutter_emergency/pages/mainscreen.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
@@ -29,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return [
       MainScreen(userInfo: contacts[0], db: db),
       ContactPage(contacts: contacts),
-      ContactPage(contacts: contacts),
+      AloneMode(),
       ContactPage(contacts: contacts),
     ];
   }
@@ -38,19 +39,19 @@ class _MyHomePageState extends State<MyHomePage> {
     return [
       PersistentBottomNavBarItem(
         icon: const Icon(CupertinoIcons.home),
-        title: ("Home"),
+        title: ("Trang chủ"),
         activeColorPrimary: CupertinoColors.systemRed,
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(CupertinoIcons.person),
-        title: ("Profile"),
+        title: ("Danh bạ"),
         activeColorPrimary: CupertinoColors.systemRed,
-        inactiveColorPrimary: CupertinoColors.systemGrey,
+        inactiveColorPrimary: Color.fromARGB(255, 130, 130, 130),
       ),
       PersistentBottomNavBarItem(
-        icon: const Icon(CupertinoIcons.phone),
-        title: ("Contact"),
+        icon: const Icon(CupertinoIcons.exclamationmark_shield),
+        title: ("Chế độ nguy hiểm"),
         activeColorPrimary: CupertinoColors.systemRed,
         inactiveColorPrimary: CupertinoColors.systemGrey,
       ),
