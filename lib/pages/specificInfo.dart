@@ -4,7 +4,7 @@ import 'package:flutter_emergency/models/contact_model.dart';
 class SpecificInfo extends StatelessWidget {
   final ContactModel contactData;
 
-  SpecificInfo({super.key, required this.contactData});
+  const SpecificInfo({super.key, required this.contactData});
 
   @override
   Widget build(BuildContext context) {

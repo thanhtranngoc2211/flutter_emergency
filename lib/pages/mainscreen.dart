@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_emergency/models/contact_model.dart';
-import 'package:flutter_emergency/models/police_data.dart';
+// import 'package:flutter_emergency/models/police_data.dart';
 import 'package:flutter_emergency/pages/specificInfo.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_svg/svg.dart';
@@ -24,6 +24,7 @@ class _MainScreen extends State<MainScreen> {
   int _currentIndex = 0;
   bool isPressed = false;
   String _locationName = 'Unknown';
+  String savedNumber = '';
   late Position _currentLocation;
   Future<void> _refresh() async {
     await _getLocation();
@@ -83,21 +84,54 @@ class _MainScreen extends State<MainScreen> {
     });
   }
 
-  Future<void> _updatePhoneData() async {
-    List<Map<String, dynamic>> data = dataPolice;
+  // Future<void> _updatePhoneData() async {
+  //   List<Map<String, dynamic>> data = dataPolice;
 
-    for (var docData in data) {
-      try {
-        await widget.db
-            .collection("phone_numbers")
-            .doc("police")
-            .collection("numbers")
-            .add(docData);
-      } catch (e) {
-        print('Error adding document: $e');
-      }
-    }
-    print('Collect data successfully!');
+  //   for (var docData in data) {
+  //     try {
+  //       await widget.db
+  //           .collection("phone_numbers")
+  //           .doc("police")
+  //           .collection("numbers")
+  //           .add(docData);
+  //     } catch (e) {
+  //       print('Error adding document: $e');
+  //     }
+  //   }
+  //   print('Collect data successfully!');
+  // }
+
+  Future<void> _showInputPopup(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        TextEditingController textController = TextEditingController();
+        return AlertDialog(
+          title: const Text('Nhập số điện thoại muốn lưu'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(labelText: 'Type something...'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Use the entered text as needed
+                savedNumber = textController.text;
+                print('Entered Text: $savedNumber');
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -178,7 +212,7 @@ class _MainScreen extends State<MainScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
+                SizedBox(
                   width: 100,
                   child: Text(_locationName,
                       overflow: TextOverflow.ellipsis,
@@ -261,7 +295,41 @@ class _MainScreen extends State<MainScreen> {
                       ))),
               GestureDetector(
                   onTap: () {
-                    _makePhoneCall("0912501959");
+                    if (savedNumber != '') {
+                      _makePhoneCall(savedNumber);
+                    } else {
+                      TextEditingController textEditingController =
+                          TextEditingController();
+
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Nhập số điện thoại muốn lưu'),
+                            content: TextField(
+                              controller: textEditingController,
+                              decoration: const InputDecoration(
+                                  hintText: 'Nhập vào đây...'),
+                            ),
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(); // Close the dialog
+                                  // Use the input value (_textEditingController.text) as needed
+                                  print('Input: ${textEditingController.text}');
+                                  savedNumber = textEditingController.text;
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  },
+                  onLongPress: () async {
+                    _showInputPopup(context);
                   },
                   child: Container(
                       margin: const EdgeInsets.all(8),
