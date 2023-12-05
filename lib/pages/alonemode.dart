@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 
 class AloneMode extends StatefulWidget {
   @override
@@ -8,6 +9,8 @@ class AloneMode extends StatefulWidget {
 }
 
 class _AloneModeState extends State<AloneMode> {
+  int _secondsRemaining = 60;
+
   int _seconds = 0;
   bool _timerActive = false;
   late Timer _timer;
@@ -17,7 +20,7 @@ class _AloneModeState extends State<AloneMode> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(Duration(seconds: 1), _updateTimer);
+    // _timer = Timer.periodic(Duration(seconds: 1), _updateTimer);
   }
 
   @override
@@ -64,6 +67,19 @@ class _AloneModeState extends State<AloneMode> {
     _audioPlayer.play(AssetSource('assets/sounds/wake.mp3'));
   }
 
+  void startTimer() {
+    const oneSecond = Duration(seconds: 1);
+    _timer = Timer.periodic(oneSecond, (timer) {
+      setState(() {
+        if (_secondsRemaining > 0) {
+          _secondsRemaining--;
+        } else {
+          _timer.cancel();
+        }
+      });
+    });
+  }
+
   Future<void> _showAlertDialog() async {
     return showDialog(
       context: context,
@@ -91,52 +107,73 @@ class _AloneModeState extends State<AloneMode> {
 
   @override
   Widget build(BuildContext context) {
+    final CountDownController _timerController = CountDownController();
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Chế độ nguy hiểm',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
-          ),
-          centerTitle: true,
-          actions: [
-            Container(
-              margin: EdgeInsets.only(right: 5),
-              child: GestureDetector(
-                onTap: _cancelTimer,
-                child: Icon(
-                  Icons.info_outline,
-                  color: Colors.red,
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'Chế độ nguy hiểm',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+            ),
+            centerTitle: true,
+            actions: [
+              Container(
+                margin: EdgeInsets.only(right: 5),
+                child: GestureDetector(
+                  onTap: () {},
+                  child: Icon(
+                    Icons.info_outline,
+                    color: Colors.red,
+                  ),
                 ),
-              ),
-            )
-          ],
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              StreamBuilder<int>(
-                stream: Stream.periodic(Duration(seconds: 1), (i) => i),
-                builder: (context, snapshot) {
-                  final remainingSeconds = _seconds - (snapshot.data ?? 0);
-                  return Text(
-                    '${remainingSeconds > 0 ? remainingSeconds : 0} seconds',
-                    style: TextStyle(fontSize: 24),
-                  );
-                },
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: !_timerActive ? _startTimer : _cancelTimer,
-                child: Text(
-                    _timerActive ? 'Cancel Timer' : 'Start 10-Second Timer'),
-              ),
+              )
             ],
           ),
-        ),
-      ),
-    );
+          // body: Center(
+          //   child: Column(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: <Widget>[
+          //       StreamBuilder<int>(
+          //         stream: Stream.periodic(Duration(seconds: 1), (i) => i),
+          //         builder: (context, snapshot) {
+          //           final remainingSeconds = _seconds - (snapshot.data ?? 0);
+          //           return Text(
+          //             '${remainingSeconds > 0 ? remainingSeconds : 0} seconds',
+          //             style: TextStyle(fontSize: 24),
+          //           );
+          //         },
+          //       ),
+          //       SizedBox(height: 20),
+          //       ElevatedButton(
+          //         onPressed: !_timerActive ? _startTimer : _cancelTimer,
+          //         child: Text(
+          //             _timerActive ? 'Cancel Timer' : 'Start 10-Second Timer'),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          body: Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 200,
+                  height: 200,
+                  child: CircularProgressIndicator(
+                    value: _secondsRemaining / 60,
+                    strokeWidth: 10,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    backgroundColor: Colors.grey,
+                  ),
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      startTimer();
+                    },
+                    child: Text('Start'))
+              ],
+            ),
+          ),
+        ));
   }
 }
