@@ -4,11 +4,14 @@ import 'package:flutter_emergency/models/contact_model.dart';
 import 'package:flutter_emergency/pages/alonemode.dart';
 import 'package:flutter_emergency/pages/contact.dart';
 import 'package:flutter_emergency/pages/mainscreen.dart';
+import 'package:flutter_emergency/pages/testPage.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  const MyHomePage({super.key, required this.storage});
+  final LocalStorage storage;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -28,10 +31,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Widget> _buildScreens() {
     return [
-      MainScreen(userInfo: contacts[0], db: db),
+      MainScreen(userInfo: contacts[0], db: db, storage: widget.storage),
       ContactPage(contacts: contacts),
       AloneMode(),
-      ContactPage(contacts: contacts),
+      TestPage(),
     ];
   }
 

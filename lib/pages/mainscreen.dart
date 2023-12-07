@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_emergency/models/contact_model.dart';
-// import 'package:flutter_emergency/models/police_data.dart';
 import 'package:flutter_emergency/pages/specificInfo.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:neumorphic_ui/neumorphic_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,10 +11,15 @@ import 'package:geocoding/geocoding.dart';
 import 'dart:math';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key, required this.userInfo, required this.db})
+  const MainScreen(
+      {Key? key,
+      required this.userInfo,
+      required this.db,
+      required this.storage})
       : super(key: key);
   final ContactModel userInfo;
   final FirebaseFirestore db;
+  final LocalStorage storage;
 
   @override
   _MainScreen createState() => _MainScreen();
@@ -46,6 +51,7 @@ class _MainScreen extends State<MainScreen> {
 
   _checkPermission() async {
     var status = await Permission.location.status;
+    await widget.storage.ready;
     print('Checking....');
     if (status == PermissionStatus.denied) {
       await Permission.location.request();
@@ -102,33 +108,73 @@ class _MainScreen extends State<MainScreen> {
   // }
 
   Future<void> _showInputPopup(BuildContext context) async {
+    bool alreadySaved = false;
+    TextEditingController textController = TextEditingController();
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        TextEditingController textController = TextEditingController();
-        return AlertDialog(
-          title: const Text('Nhập số điện thoại muốn lưu'),
-          content: TextField(
-            controller: textController,
-            decoration: const InputDecoration(labelText: 'Type something...'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Use the entered text as needed
-                savedNumber = textController.text;
-                print('Entered Text: $savedNumber');
-                Navigator.of(context).pop();
-              },
-              child: const Text('OK'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Nhập số điện thoại muốn lưu'),
+              content: Container(
+                height: 100,
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: textController,
+                      decoration:
+                          const InputDecoration(labelText: 'Type something...'),
+                      onChanged: (value) {
+                        print(
+                            '${value} vs ${widget.storage.getItem('savedNumber')}');
+                        setState(() {
+                          alreadySaved =
+                              value == widget.storage.getItem('savedNumber');
+                        });
+                      },
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Visibility(
+                      child: const Text(
+                        'Bạn đã lưu số này làm số khẩn cấp rồi',
+                        style: TextStyle(fontSize: 13, color: Colors.red),
+                      ),
+                      visible: alreadySaved,
+                    )
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: alreadySaved
+                      ? null
+                      : () {
+                          // Use the entered text as needed
+                          savedNumber = textController.text;
+                          print('Entered Text: $savedNumber');
+                          if (widget.storage.getItem('savedNumber') ==
+                              savedNumber) {
+                          } else {
+                            widget.storage
+                                .setItem('savedNumber', '${savedNumber}');
+                          }
+                          Navigator.of(context).pop();
+                        },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -295,37 +341,11 @@ class _MainScreen extends State<MainScreen> {
                       ))),
               GestureDetector(
                   onTap: () {
-                    if (savedNumber != '') {
-                      _makePhoneCall(savedNumber);
+                    if (widget.storage.getItem('savedNumber') != null &&
+                        widget.storage.getItem('savedNumber') != '') {
+                      _makePhoneCall(widget.storage.getItem('savedNumber'));
                     } else {
-                      TextEditingController textEditingController =
-                          TextEditingController();
-
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Nhập số điện thoại muốn lưu'),
-                            content: TextField(
-                              controller: textEditingController,
-                              decoration: const InputDecoration(
-                                  hintText: 'Nhập vào đây...'),
-                            ),
-                            actions: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(); // Close the dialog
-                                  // Use the input value (_textEditingController.text) as needed
-                                  print('Input: ${textEditingController.text}');
-                                  savedNumber = textEditingController.text;
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      _showInputPopup(context);
                     }
                   },
                   onLongPress: () async {

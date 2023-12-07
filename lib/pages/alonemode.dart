@@ -9,15 +9,16 @@ class AloneMode extends StatefulWidget {
 
 class _AloneModeState extends State<AloneMode> {
   int _seconds = 0;
+  int _minutes = 0;
   bool _timerActive = false;
-  late Timer _timer;
+  late Timer _timer = Timer(Duration(seconds: 0), () {});
+
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool alarmTriggered = false;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(Duration(seconds: 1), _updateTimer);
   }
 
   @override
@@ -29,6 +30,9 @@ class _AloneModeState extends State<AloneMode> {
 
   void _updateTimer(Timer timer) {
     setState(() {
+      if ((_seconds % 60 == 0) && _minutes > 0) {
+        _minutes--;
+      }
       if (_seconds > 0) {
         _seconds--;
       } else {
@@ -43,7 +47,8 @@ class _AloneModeState extends State<AloneMode> {
   void _startTimer() {
     _cancelTimer(); // Cancel existing timer before starting a new one
     setState(() {
-      _seconds = 10; // 10 seconds for testing, replace with your desired time
+      _seconds = 120;
+      _minutes = (_seconds / 60).floor();
       _timerActive = true;
       print('start timer');
     });
@@ -77,6 +82,7 @@ class _AloneModeState extends State<AloneMode> {
               ElevatedButton(
                 onPressed: () {
                   _audioPlayer.stop();
+                  _cancelTimer();
                   Navigator.of(context).pop(); // Close the AlertDialog
                   alarmTriggered = false;
                 },
@@ -87,6 +93,11 @@ class _AloneModeState extends State<AloneMode> {
         );
       },
     );
+  }
+
+  String _formatTime(int seconds, int minutes) {
+    int remainingSeconds = seconds % 60;
+    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -122,7 +133,7 @@ class _AloneModeState extends State<AloneMode> {
                 builder: (context, snapshot) {
                   final remainingSeconds = _seconds - (snapshot.data ?? 0);
                   return Text(
-                    '${remainingSeconds > 0 ? remainingSeconds : 0} seconds',
+                    '${_formatTime(_seconds, _minutes)}',
                     style: TextStyle(fontSize: 24),
                   );
                 },
