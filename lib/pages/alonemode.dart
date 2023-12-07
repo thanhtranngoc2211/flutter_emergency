@@ -11,7 +11,7 @@ class _AloneModeState extends State<AloneMode> {
   int _seconds = 0;
   int _minutes = 0;
   bool _timerActive = false;
-  late Timer _timer = Timer(Duration(seconds: 0), () {});
+  late Timer _timer = Timer(const Duration(seconds: 0), () {});
 
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool alarmTriggered = false;
@@ -52,7 +52,7 @@ class _AloneModeState extends State<AloneMode> {
       _timerActive = true;
       print('start timer');
     });
-    _timer = Timer.periodic(Duration(seconds: 1), _updateTimer);
+    _timer = Timer.periodic(const Duration(seconds: 1), _updateTimer);
   }
 
   void _cancelTimer() {
@@ -76,8 +76,8 @@ class _AloneModeState extends State<AloneMode> {
       builder: (BuildContext context) {
         return Center(
           child: AlertDialog(
-            title: Text('Trigger Alarm!!!'),
-            content: Text('RUNNNNNN!!!!!!!'),
+            title: const Text('Trigger Alarm!!!'),
+            content: const Text('RUNNNNNN!!!!!!!'),
             actions: [
               ElevatedButton(
                 onPressed: () {
@@ -106,17 +106,17 @@ class _AloneModeState extends State<AloneMode> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'Chế độ nguy hiểm',
             style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
           ),
           centerTitle: true,
           actions: [
             Container(
-              margin: EdgeInsets.only(right: 5),
+              margin: const EdgeInsets.only(right: 5),
               child: GestureDetector(
                 onTap: _cancelTimer,
-                child: Icon(
+                child: const Icon(
                   Icons.info_outline,
                   color: Colors.red,
                 ),
@@ -129,16 +129,15 @@ class _AloneModeState extends State<AloneMode> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               StreamBuilder<int>(
-                stream: Stream.periodic(Duration(seconds: 1), (i) => i),
+                stream: Stream.periodic(const Duration(seconds: 1), (i) => i),
                 builder: (context, snapshot) {
-                  final remainingSeconds = _seconds - (snapshot.data ?? 0);
                   return Text(
-                    '${_formatTime(_seconds, _minutes)}',
-                    style: TextStyle(fontSize: 24),
+                    _formatTime(_seconds, _minutes),
+                    style: const TextStyle(fontSize: 24),
                   );
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: !_timerActive ? _startTimer : _cancelTimer,
                 child: Text(
