@@ -49,6 +49,10 @@ dependencies:
   cloud_firestore: ^4.13.3
   audioplayers: ^5.2.1
   localstorage: ^4.0.1+4
+  telephony: 
+    git:
+      url: https://github.com/suhardik/s_telephony.git
+      ref: develop
 
 dev_dependencies:
   flutter_test:

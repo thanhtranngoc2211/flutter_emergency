@@ -33,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return [
       MainScreen(userInfo: contacts[0], db: db, storage: widget.storage),
       ContactPage(contacts: contacts),
-      AloneMode(),
+      AloneMode(storage: widget.storage),
       TestPage(),
     ];
   }

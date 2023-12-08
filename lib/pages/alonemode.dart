@@ -1,10 +1,17 @@
 import 'dart:async';
+import 'package:localstorage/localstorage.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:telephony/telephony.dart';
 
 class AloneMode extends StatefulWidget {
   @override
   _AloneModeState createState() => _AloneModeState();
+
+  const AloneMode({Key? key, required this.storage});
+
+  final LocalStorage storage;
 }
 
 class _AloneModeState extends State<AloneMode> {
@@ -12,6 +19,7 @@ class _AloneModeState extends State<AloneMode> {
   int _minutes = 0;
   bool _timerActive = false;
   late Timer _timer = Timer(const Duration(seconds: 0), () {});
+  final Telephony telephony = Telephony.instance;
 
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool alarmTriggered = false;
@@ -19,6 +27,7 @@ class _AloneModeState extends State<AloneMode> {
   @override
   void initState() {
     super.initState();
+    _checkPermission();
   }
 
   @override
@@ -26,6 +35,16 @@ class _AloneModeState extends State<AloneMode> {
     _timer.cancel();
     _audioPlayer.dispose();
     super.dispose();
+  }
+
+  void _checkPermission() async {
+    await widget.storage.ready;
+    var phonePermisson = await Permission.phone.status;
+    var smsPermisson = await Permission.sms.status;
+    if (phonePermisson == PermissionStatus.denied ||
+        smsPermisson == PermissionStatus.denied) {
+      await telephony.requestPhoneAndSmsPermissions;
+    }
   }
 
   void _updateTimer(Timer timer) {
@@ -39,15 +58,20 @@ class _AloneModeState extends State<AloneMode> {
         _timerActive = false;
         timer.cancel();
         _playSound(); // Play sound when countdown reaches 0
+        _sendMessage();
         _showAlertDialog();
       }
     });
   }
 
+  void _sendMessage() {
+    telephony.sendSms(to: "0822455477", message: "May the force be with you!");
+  }
+
   void _startTimer() {
     _cancelTimer(); // Cancel existing timer before starting a new one
     setState(() {
-      _seconds = 120;
+      _seconds = 5;
       _minutes = (_seconds / 60).floor();
       _timerActive = true;
       print('start timer');
