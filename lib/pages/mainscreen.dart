@@ -135,7 +135,7 @@ class _MainScreen extends State<MainScreen> {
                         });
                       },
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     Visibility(
@@ -190,7 +190,7 @@ class _MainScreen extends State<MainScreen> {
           child: ListView(
             children: [
               const SizedBox(
-                height: 50,
+                height: 20,
               ),
               _mainMessageHomePage(),
               const SizedBox(
@@ -301,9 +301,25 @@ class _MainScreen extends State<MainScreen> {
                       decoration: BoxDecoration(
                           color: Colors.amber,
                           borderRadius: BorderRadius.circular(30)),
-                      child: const Icon(
-                        Icons.local_police,
-                        size: 50,
+                      child: const Column(
+                        children: [
+                          Expanded(
+                            child: Icon(
+                              Icons.local_police,
+                              size: 50,
+                            ),
+                          ),
+                          Text(
+                            'Công an',
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          )
+                        ],
                       ))),
               GestureDetector(
                   onTap: () {
@@ -316,10 +332,26 @@ class _MainScreen extends State<MainScreen> {
                       decoration: BoxDecoration(
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(30)),
-                      child: const Icon(
-                        Icons.fire_truck_outlined,
-                        size: 50,
-                      ))),
+                      child: const Column(
+                        children: [
+                          Expanded(
+                            child: Icon(
+                              Icons.fire_truck_outlined,
+                              size: 50,
+                            ),
+                          ),
+                          Text(
+                            'Cứu hỏa',
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          )
+                        ],
+                      )))
             ],
           ),
           TableRow(
@@ -335,9 +367,25 @@ class _MainScreen extends State<MainScreen> {
                       decoration: BoxDecoration(
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(30)),
-                      child: const Icon(
-                        Icons.medical_services_outlined,
-                        size: 50,
+                      child: const Column(
+                        children: [
+                          Expanded(
+                            child: Icon(
+                              Icons.medical_services_outlined,
+                              size: 50,
+                            ),
+                          ),
+                          Text(
+                            'Cấp cứu',
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          )
+                        ],
                       ))),
               GestureDetector(
                   onTap: () {
@@ -358,9 +406,25 @@ class _MainScreen extends State<MainScreen> {
                       decoration: BoxDecoration(
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(30)),
-                      child: const Icon(
-                        Icons.family_restroom_outlined,
-                        size: 50,
+                      child: const Column(
+                        children: [
+                          Expanded(
+                            child: Icon(
+                              Icons.family_restroom,
+                              size: 50,
+                            ),
+                          ),
+                          Text(
+                            'Người thân',
+                            style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          )
+                        ],
                       ))),
             ],
           ),
@@ -392,7 +456,7 @@ class _MainScreen extends State<MainScreen> {
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.book_outlined),
-          label: 'Guideline',
+          label: 'Test',
         ),
       ],
       unselectedIconTheme: const IconThemeData(color: Colors.grey),
@@ -468,16 +532,12 @@ class _MainScreen extends State<MainScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text('Cần cuộc gọi',
-              style: TextStyle(fontSize: 45, fontWeight: FontWeight.w700)),
+              style: TextStyle(fontSize: 35, fontWeight: FontWeight.w700)),
           Text('khẩn cấp?',
-              style: TextStyle(fontSize: 45, fontWeight: FontWeight.w700)),
+              style: TextStyle(fontSize: 35, fontWeight: FontWeight.w700)),
           SizedBox(
             height: 15,
           ),
-          Text(
-            'Chọn đối tượng liên hệ',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-          )
         ],
       ),
     );

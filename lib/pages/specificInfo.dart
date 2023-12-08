@@ -12,7 +12,7 @@ class SpecificInfo extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xffeff2f9),
       appBar: appBar(),
-      body: Column(children: [
+      body: ListView(children: [
         const SizedBox(
           height: 30,
         ),

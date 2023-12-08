@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,7 @@ class AloneMode extends StatefulWidget {
 class _AloneModeState extends State<AloneMode> {
   int _seconds = 0;
   int _minutes = 0;
+  List<String> latLong = [];
   bool _timerActive = false;
   late Timer _timer = Timer(const Duration(seconds: 0), () {});
   final Telephony telephony = Telephony.instance;
@@ -37,17 +40,50 @@ class _AloneModeState extends State<AloneMode> {
     super.dispose();
   }
 
+  Future<List<String>?> _getLocation() async {
+    try {
+      final currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        currentPosition.latitude,
+        currentPosition.longitude,
+      );
+      Placemark place = placemarks[0];
+      latLong = [
+        currentPosition.latitude.toString(),
+        currentPosition.longitude.toString()
+      ];
+
+      String locationName =
+          "${place.name}, ${place.locality}, ${place.country}";
+
+      print(locationName);
+
+      List<String> locationString = [locationName, latLong[0], latLong[1]];
+
+      return locationString;
+    } catch (e) {
+      print("Error: $e");
+    }
+    return null;
+  }
+
   void _checkPermission() async {
     await widget.storage.ready;
     var phonePermisson = await Permission.phone.status;
     var smsPermisson = await Permission.sms.status;
+    var locationPermission = await Permission.location.status;
     if (phonePermisson == PermissionStatus.denied ||
         smsPermisson == PermissionStatus.denied) {
       await telephony.requestPhoneAndSmsPermissions;
     }
+    if (locationPermission == PermissionStatus.denied) {
+      await Permission.location.request();
+    }
   }
 
-  void _updateTimer(Timer timer) {
+  void _updateTimer(Timer timer) async {
     setState(() {
       if ((_seconds % 60 == 0) && _minutes > 0) {
         _minutes--;
@@ -64,14 +100,21 @@ class _AloneModeState extends State<AloneMode> {
     });
   }
 
-  void _sendMessage() {
-    telephony.sendSms(to: "0822455477", message: "May the force be with you!");
+  void _sendMessage() async {
+    List<String>? locationString = await _getLocation();
+    if (locationString != null) {
+      telephony.sendSms(
+          to: "0822455477",
+          message:
+              "${locationString[0]} tại kinh độ ${locationString[1]} và vĩ độ ${locationString[2]}");
+    } else
+      print('No location');
   }
 
   void _startTimer() {
     _cancelTimer(); // Cancel existing timer before starting a new one
     setState(() {
-      _seconds = 5;
+      _seconds = 60 * 5;
       _minutes = (_seconds / 60).floor();
       _timerActive = true;
       print('start timer');
@@ -83,6 +126,7 @@ class _AloneModeState extends State<AloneMode> {
     setState(() {
       _timerActive = false;
       _timer.cancel();
+      _minutes = 0;
       _seconds = 0;
       print('timer canceled');
     });
@@ -152,20 +196,23 @@ class _AloneModeState extends State<AloneMode> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              StreamBuilder<int>(
-                stream: Stream.periodic(const Duration(seconds: 1), (i) => i),
-                builder: (context, snapshot) {
-                  return Text(
-                    _formatTime(_seconds, _minutes),
-                    style: const TextStyle(fontSize: 24),
-                  );
-                },
-              ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: !_timerActive ? _startTimer : _cancelTimer,
-                child: Text(
-                    _timerActive ? 'Cancel Timer' : 'Start 10-Second Timer'),
+              GestureDetector(
+                onTap: !_timerActive ? _startTimer : _cancelTimer,
+                child: InkWell(
+                    child: Container(
+                        height: 250,
+                        width: 250,
+                        decoration: const BoxDecoration(
+                            shape: BoxShape.circle, color: Colors.green),
+                        child: Center(
+                            child: Text(
+                          _timerActive
+                              ? _formatTime(_seconds, _minutes)
+                              : 'Kích hoạt',
+                          style: const TextStyle(
+                              fontSize: 23, fontWeight: FontWeight.w500),
+                        )))),
               ),
             ],
           ),

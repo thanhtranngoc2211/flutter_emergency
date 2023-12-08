@@ -77,84 +77,87 @@ class ContactPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        print('OK ${contacts[index].birth}');
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SpecificInfo(
-                                    contactData: contacts[index])));
-                      },
-                      child: Container(
-                        height: 80,
-                        width: 360,
-                        margin: const EdgeInsets.only(top: 5, bottom: 5),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  color: Colors.grey.withOpacity(0.3))
-                            ]),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding:
-                                    const EdgeInsets.only(left: 15, right: 15),
-                                child: Row(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          child: Image.asset(
-                                              contacts[index].avatarPath ??
-                                                  'No path',
-                                              width: 50,
-                                              height: 50,
-                                              fit: BoxFit.cover),
-                                        ),
-                                        const SizedBox(
-                                          width: 25,
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(contacts[index].name,
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          print('OK ${contacts[index].birth}');
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SpecificInfo(
+                                      contactData: contacts[index])));
+                        },
+                        child: Container(
+                          height: 80,
+                          margin: const EdgeInsets.only(
+                              top: 5, bottom: 5, left: 20, right: 20),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                    spreadRadius: 1,
+                                    blurRadius: 3,
+                                    color: Colors.grey.withOpacity(0.3))
+                              ]),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 15, right: 15),
+                                  child: Row(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            child: Image.asset(
+                                                contacts[index].avatarPath ??
+                                                    'No path',
+                                                width: 50,
+                                                height: 50,
+                                                fit: BoxFit.cover),
+                                          ),
+                                          const SizedBox(
+                                            width: 25,
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(contacts[index].name,
+                                                  style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500)),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                contacts[index].relation ??
+                                                    'Unknown',
                                                 style: const TextStyle(
-                                                    fontSize: 16,
+                                                    color: Colors.grey,
                                                     fontWeight:
-                                                        FontWeight.w500)),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                            Text(
-                                              contacts[index].relation ??
-                                                  'Unknown',
-                                              style: const TextStyle(
-                                                  color: Colors.grey,
-                                                  fontWeight: FontWeight.w500),
-                                            )
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const Spacer(),
-                                    const Icon(Icons.arrow_forward,
-                                        size: 17, color: Colors.red)
-                                  ],
+                                                        FontWeight.w500),
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const Spacer(),
+                                      const Icon(Icons.arrow_forward,
+                                          size: 17, color: Colors.red)
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     )
